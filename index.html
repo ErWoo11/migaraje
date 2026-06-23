@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="description" content="Control de revisiones de tus coches" />
+  <title>MiGaraje</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════ SCREENS ═══ -->
+
+  <!-- 1. PANTALLA: Lista de coches -->
+  <div id="screen-cars" class="screen active">
+    <header class="top-bar">
+      <span class="app-logo">🚗 MiGaraje</span>
+      <button class="btn-icon" id="btn-add-car" title="Añadir coche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </header>
+    <main class="content">
+      <p class="section-label">Mis coches</p>
+      <div id="cars-list" class="card-grid"></div>
+      <div id="cars-empty" class="empty-state hidden">
+        <span class="empty-icon">🔧</span>
+        <p>Aún no tienes coches añadidos.</p>
+        <button class="btn-primary" id="btn-add-car-empty">Añadir primer coche</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 2. PANTALLA: Revisiones de un coche -->
+  <div id="screen-records" class="screen">
+    <header class="top-bar">
+      <button class="btn-icon btn-back" data-target="screen-cars">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span id="records-car-name" class="top-bar-title"></span>
+      <button class="btn-icon" id="btn-add-record" title="Añadir registro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </header>
+    <main class="content">
+      <p class="section-label">Historial</p>
+      <div id="records-list" class="records-list"></div>
+      <div id="records-empty" class="empty-state hidden">
+        <span class="empty-icon">📋</span>
+        <p>Sin registros todavía.</p>
+        <button class="btn-primary" id="btn-add-record-empty">Añadir primero</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════ MODALS ═══ -->
+
+  <!-- Modal: Añadir coche -->
+  <div id="modal-car" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-car-title">Añadir coche</h2>
+        <button class="btn-icon modal-close" data-modal="modal-car">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="car-name">Nombre / Matrícula</label>
+          <input type="text" id="car-name" placeholder="Ej: Golf GTI · 1234ABC" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="car-brand">Marca y modelo</label>
+          <input type="text" id="car-brand" placeholder="Ej: Volkswagen Golf" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="car-year">Año</label>
+          <input type="number" id="car-year" placeholder="Ej: 2019" min="1900" max="2099" />
+        </div>
+        <div class="field">
+          <label for="car-color">Color (etiqueta visual)</label>
+          <div class="color-picker-row">
+            <input type="color" id="car-color" value="#3b82f6" />
+            <span id="car-color-label">#3b82f6</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost modal-close" data-modal="modal-car">Cancelar</button>
+        <button class="btn-primary" id="btn-save-car">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Elegir tipo de registro -->
+  <div id="modal-type" class="modal-overlay hidden">
+    <div class="modal modal-compact">
+      <div class="modal-header">
+        <h2>Tipo de registro</h2>
+        <button class="btn-icon modal-close" data-modal="modal-type">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body type-selector">
+        <button class="type-btn" data-type="oil">
+          <span class="type-icon">🛢️</span>
+          <span class="type-name">Cambio de Aceite</span>
+        </button>
+        <button class="type-btn" data-type="maintenance">
+          <span class="type-icon">🔧</span>
+          <span class="type-name">Mantenimiento</span>
+        </button>
+        <button class="type-btn" data-type="breakdown">
+          <span class="type-icon">⚠️</span>
+          <span class="type-name">Avería</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Formulario Cambio de Aceite -->
+  <div id="modal-oil" class="modal-overlay hidden">
+    <div class="modal modal-tall">
+      <div class="modal-header">
+        <button class="btn-icon" id="btn-back-oil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2>🛢️ Cambio de Aceite</h2>
+        <button class="btn-icon modal-close" data-modal="modal-oil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field-row">
+          <div class="field">
+            <label for="oil-fecha">Fecha</label>
+            <input type="date" id="oil-fecha" />
+          </div>
+          <div class="field">
+            <label for="oil-kms">Kms. actuales</label>
+            <input type="number" id="oil-kms" placeholder="Ex: 85000" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="oil-tipo">Tipo de Aceite</label>
+          <input type="text" id="oil-tipo" placeholder="Ex: 5W-30 Sintético" />
+        </div>
+        <div class="field">
+          <label for="oil-taller">Taller</label>
+          <input type="text" id="oil-taller" placeholder="Ex: Talleres García" />
+        </div>
+        <div class="field">
+          <label for="oil-precio">Precio (€)</label>
+          <input type="number" id="oil-precio" placeholder="0.00" step="0.01" min="0" />
+        </div>
+
+        <p class="section-label mt">Elementos revisados</p>
+        <div class="check-table">
+          <div class="check-header">
+            <span></span>
+            <span>Servicio</span>
+            <span>Próximo</span>
+          </div>
+          <div class="check-row" data-item="filtro_aceite">
+            <span>Filtro aceite</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+          <div class="check-row" data-item="filtro_aire">
+            <span>Filtro aire</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+          <div class="check-row" data-item="filtro_gasolina">
+            <span>Filtro gasolina</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+          <div class="check-row" data-item="filtro_polen">
+            <span>Filtro polen</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+          <div class="check-row" data-item="correas">
+            <span>Correas</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+          <div class="check-row" data-item="niveles">
+            <span>Niveles</span>
+            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
+            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
+          </div>
+        </div>
+
+        <div class="field mt">
+          <label for="oil-prox-kms">Próxima revisión a (Kms.)</label>
+          <input type="number" id="oil-prox-kms" placeholder="Ex: 95000" />
+        </div>
+        <div class="field">
+          <label for="oil-notas">Notas</label>
+          <textarea id="oil-notas" rows="3" placeholder="Observaciones..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost modal-close" data-modal="modal-oil">Cancelar</button>
+        <button class="btn-primary" id="btn-save-oil">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Formulario Mantenimiento / Avería -->
+  <div id="modal-general" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <button class="btn-icon" id="btn-back-general">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2 id="modal-general-title">Mantenimiento</h2>
+        <button class="btn-icon modal-close" data-modal="modal-general">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="gen-nombre">Nombre</label>
+          <input type="text" id="gen-nombre" placeholder="Ex: Pastillas de freno" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="gen-fecha">Fecha</label>
+          <input type="date" id="gen-fecha" />
+        </div>
+        <div class="field">
+          <label for="gen-kms">Kms. actuales</label>
+          <input type="number" id="gen-kms" placeholder="Ex: 85000" />
+        </div>
+        <div class="field">
+          <label for="gen-taller">Taller</label>
+          <input type="text" id="gen-taller" placeholder="Ex: Talleres García" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="gen-precio">Precio (€)</label>
+          <input type="number" id="gen-precio" placeholder="0.00" step="0.01" min="0" />
+        </div>
+        <div class="field">
+          <label for="gen-notas">Notas</label>
+          <textarea id="gen-notas" rows="3" placeholder="Descripción o comentarios..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost modal-close" data-modal="modal-general">Cancelar</button>
+        <button class="btn-primary" id="btn-save-general">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Ver detalle de un registro -->
+  <div id="modal-detail" class="modal-overlay hidden">
+    <div class="modal modal-tall">
+      <div class="modal-header">
+        <h2 id="detail-title">Detalle</h2>
+        <button class="btn-icon modal-close" data-modal="modal-detail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="detail-body"></div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="btn-delete-record">Eliminar</button>
+        <button class="btn-ghost modal-close" data-modal="modal-detail">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
