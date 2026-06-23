@@ -2,282 +2,355 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a1a2e" />
-  <meta name="description" content="Control de revisiones de tus coches" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>MiGaraje</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════ SCREENS ═══ -->
-
-  <!-- 1. PANTALLA: Lista de coches -->
-  <div id="screen-cars" class="screen active">
-    <header class="top-bar">
-      <span class="app-logo">🚗 MiGaraje</span>
-      <button class="btn-icon" id="btn-add-car" title="Añadir coche">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<!-- ══════════════════════ SCREEN: COCHES ══════════════════════ -->
+<div id="screen-cars" class="screen active">
+  <div class="hero-bar">
+    <div class="hero-inner">
+      <div>
+        <p class="hero-eyebrow">Bienvenido</p>
+        <h1 class="hero-title">MiGaraje</h1>
+      </div>
+      <button class="fab-small" id="btn-add-car" aria-label="Añadir coche">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
-    </header>
-    <main class="content">
-      <p class="section-label">Mis coches</p>
-      <div id="cars-list" class="card-grid"></div>
-      <div id="cars-empty" class="empty-state hidden">
-        <span class="empty-icon">🔧</span>
-        <p>Aún no tienes coches añadidos.</p>
-        <button class="btn-primary" id="btn-add-car-empty">Añadir primer coche</button>
-      </div>
-    </main>
+    </div>
   </div>
 
-  <!-- 2. PANTALLA: Revisiones de un coche -->
-  <div id="screen-records" class="screen">
-    <header class="top-bar">
-      <button class="btn-icon btn-back" data-target="screen-cars">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  <main class="page-content">
+    <p class="list-label">Mis coches</p>
+    <div id="cars-list"></div>
+    <div id="cars-empty" class="empty-state hidden">
+      <div class="empty-icon-wrap">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1"/><path d="M19 17h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-1"/><path d="M14 17H9"/><path d="M17 17v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M9 8l1-4h4l1 4"/></svg>
+      </div>
+      <p class="empty-title">Sin coches todavía</p>
+      <p class="empty-sub">Añade tu primer vehículo para empezar a registrar revisiones.</p>
+      <button class="btn-outline" id="btn-add-car-empty">Añadir coche</button>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════ SCREEN: REGISTROS ══════════════════════ -->
+<div id="screen-records" class="screen">
+  <div class="nav-bar" id="records-nav">
+    <button class="nav-back" data-target="screen-cars" aria-label="Volver">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="nav-info">
+      <span id="records-car-name" class="nav-title"></span>
+    </div>
+    <button class="fab-small" id="btn-add-record" aria-label="Añadir registro">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+
+  <main class="page-content page-content--shifted">
+    <p class="list-label">Historial de revisiones</p>
+    <div id="records-list"></div>
+    <div id="records-empty" class="empty-state hidden">
+      <div class="empty-icon-wrap">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <p class="empty-title">Sin registros</p>
+      <p class="empty-sub">Empieza a documentar el mantenimiento de este vehículo.</p>
+      <button class="btn-outline" id="btn-add-record-empty">Primer registro</button>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════ MODALS ══════════════════════ -->
+
+<!-- Modal: Añadir coche -->
+<div id="modal-car" class="sheet-overlay hidden" role="dialog" aria-modal="true" aria-label="Añadir coche">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title">Añadir coche</h2>
+      <button class="icon-btn modal-close" data-modal="modal-car" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <span id="records-car-name" class="top-bar-title"></span>
-      <button class="btn-icon" id="btn-add-record" title="Añadir registro">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <div class="sheet-body">
+      <div class="field-group">
+        <label class="field-label" for="car-name">Nombre / Matrícula</label>
+        <input class="field-input" type="text" id="car-name" placeholder="Ej: Golf GTI · 1234ABC" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="car-brand">Marca y modelo</label>
+        <input class="field-input" type="text" id="car-brand" placeholder="Ej: Volkswagen Golf" autocomplete="off" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="car-year">Año</label>
+          <input class="field-input" type="number" id="car-year" placeholder="2020" min="1900" max="2099" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Color</label>
+          <div class="color-row">
+            <input type="color" id="car-color" value="#6366f1" class="color-swatch" />
+            <span id="car-color-hex" class="color-hex">#6366f1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-ghost modal-close" data-modal="modal-car">Cancelar</button>
+      <button class="btn-primary" id="btn-save-car">Guardar coche</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tipo de registro -->
+<div id="modal-type" class="sheet-overlay hidden" role="dialog" aria-modal="true" aria-label="Tipo de registro">
+  <div class="sheet sheet--compact">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title">¿Qué quieres registrar?</h2>
+      <button class="icon-btn modal-close" data-modal="modal-type" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-    </header>
-    <main class="content">
-      <p class="section-label">Historial</p>
-      <div id="records-list" class="records-list"></div>
-      <div id="records-empty" class="empty-state hidden">
-        <span class="empty-icon">📋</span>
-        <p>Sin registros todavía.</p>
-        <button class="btn-primary" id="btn-add-record-empty">Añadir primero</button>
-      </div>
-    </main>
-  </div>
-
-  <!-- ═══════════════════════════════════ MODALS ═══ -->
-
-  <!-- Modal: Añadir coche -->
-  <div id="modal-car" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 id="modal-car-title">Añadir coche</h2>
-        <button class="btn-icon modal-close" data-modal="modal-car">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="field">
-          <label for="car-name">Nombre / Matrícula</label>
-          <input type="text" id="car-name" placeholder="Ej: Golf GTI · 1234ABC" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label for="car-brand">Marca y modelo</label>
-          <input type="text" id="car-brand" placeholder="Ej: Volkswagen Golf" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label for="car-year">Año</label>
-          <input type="number" id="car-year" placeholder="Ej: 2019" min="1900" max="2099" />
-        </div>
-        <div class="field">
-          <label for="car-color">Color (etiqueta visual)</label>
-          <div class="color-picker-row">
-            <input type="color" id="car-color" value="#3b82f6" />
-            <span id="car-color-label">#3b82f6</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-ghost modal-close" data-modal="modal-car">Cancelar</button>
-        <button class="btn-primary" id="btn-save-car">Guardar</button>
-      </div>
+    </div>
+    <div class="sheet-body type-grid">
+      <button class="type-card" data-type="oil">
+        <span class="type-card__icon type-card__icon--oil">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3h10l2 4H5L7 3z"/><path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/><path d="M9 11v5"/><path d="M15 11v5"/><path d="M12 11v5"/></svg>
+        </span>
+        <span class="type-card__name">Cambio de Aceite</span>
+        <span class="type-card__sub">Filtros, niveles y más</span>
+      </button>
+      <button class="type-card" data-type="maintenance">
+        <span class="type-card__icon type-card__icon--maint">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </span>
+        <span class="type-card__name">Mantenimiento</span>
+        <span class="type-card__sub">Revisión programada</span>
+      </button>
+      <button class="type-card" data-type="breakdown">
+        <span class="type-card__icon type-card__icon--break">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
+        <span class="type-card__name">Avería</span>
+        <span class="type-card__sub">Reparación no prevista</span>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- Modal: Elegir tipo de registro -->
-  <div id="modal-type" class="modal-overlay hidden">
-    <div class="modal modal-compact">
-      <div class="modal-header">
-        <h2>Tipo de registro</h2>
-        <button class="btn-icon modal-close" data-modal="modal-type">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+<!-- Modal: Cambio de Aceite -->
+<div id="modal-oil" class="sheet-overlay hidden" role="dialog" aria-modal="true" aria-label="Cambio de aceite">
+  <div class="sheet sheet--tall">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <button class="icon-btn" id="btn-back-oil" aria-label="Volver">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h2 class="sheet-title">Cambio de Aceite</h2>
+      <button class="icon-btn modal-close" data-modal="modal-oil" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="oil-fecha">Fecha</label>
+          <input class="field-input" type="date" id="oil-fecha" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="oil-kms">Kilómetros</label>
+          <input class="field-input" type="number" id="oil-kms" placeholder="85 000" />
+        </div>
       </div>
-      <div class="modal-body type-selector">
-        <button class="type-btn" data-type="oil">
-          <span class="type-icon">🛢️</span>
-          <span class="type-name">Cambio de Aceite</span>
-        </button>
-        <button class="type-btn" data-type="maintenance">
-          <span class="type-icon">🔧</span>
-          <span class="type-name">Mantenimiento</span>
-        </button>
-        <button class="type-btn" data-type="breakdown">
-          <span class="type-icon">⚠️</span>
-          <span class="type-name">Avería</span>
-        </button>
+      <div class="field-group">
+        <label class="field-label" for="oil-tipo">Tipo de Aceite</label>
+        <input class="field-input" type="text" id="oil-tipo" placeholder="Ej: 5W-30 Sintético" />
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="oil-taller">Taller</label>
+          <input class="field-input" type="text" id="oil-taller" placeholder="Ej: Talleres García" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="oil-precio">Precio €</label>
+          <input class="field-input" type="number" id="oil-precio" placeholder="0.00" step="0.01" min="0" />
+        </div>
+      </div>
+
+      <div class="checks-section">
+        <p class="checks-title">Elementos revisados</p>
+        <div class="checks-legend">
+          <span></span>
+          <span class="legend-label">Servicio</span>
+          <span class="legend-label">Próximo</span>
+        </div>
+        <div class="checks-list">
+          <div class="check-item" data-item="filtro_aceite">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10l2 4H5L7 3z"/><path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/></svg>
+              </span>
+              <span class="check-item__name">Filtro aceite</span>
+            </div>
+            <label class="toggle-check" aria-label="Filtro aceite servicio">
+              <input type="checkbox" data-col="servicio" />
+              <span class="toggle-check__box"></span>
+            </label>
+            <label class="toggle-check" aria-label="Filtro aceite próximo">
+              <input type="checkbox" data-col="proximo" />
+              <span class="toggle-check__box toggle-check__box--next"></span>
+            </label>
+          </div>
+          <div class="check-item" data-item="filtro_gasoil">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22h12M4 9h10M2 15h14M12 2l4 4-8 8-4-4 8-8z"/></svg>
+              </span>
+              <span class="check-item__name">Filtro gasoil</span>
+            </div>
+            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
+            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+          </div>
+          <div class="check-item" data-item="filtro_aire">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 10 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+              </span>
+              <span class="check-item__name">Filtro aire</span>
+            </div>
+            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
+            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+          </div>
+          <div class="check-item" data-item="filtro_habitaculo">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              </span>
+              <span class="check-item__name">Filtro habitáculo</span>
+            </div>
+            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
+            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+          </div>
+          <div class="check-item" data-item="niveles">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+              </span>
+              <span class="check-item__name">Niveles</span>
+            </div>
+            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
+            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+          </div>
+          <div class="check-item" data-item="presion_neumaticos">
+            <div class="check-item__info">
+              <span class="check-item__icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+              </span>
+              <span class="check-item__name">Presión neumáticos</span>
+            </div>
+            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
+            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="oil-prox-kms">Próxima revisión (km)</label>
+        <input class="field-input" type="number" id="oil-prox-kms" placeholder="Ej: 95 000" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="oil-notas">Notas</label>
+        <textarea class="field-input field-textarea" id="oil-notas" rows="3" placeholder="Observaciones adicionales…"></textarea>
       </div>
     </div>
-  </div>
-
-  <!-- Modal: Formulario Cambio de Aceite -->
-  <div id="modal-oil" class="modal-overlay hidden">
-    <div class="modal modal-tall">
-      <div class="modal-header">
-        <button class="btn-icon" id="btn-back-oil">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <h2>🛢️ Cambio de Aceite</h2>
-        <button class="btn-icon modal-close" data-modal="modal-oil">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="field-row">
-          <div class="field">
-            <label for="oil-fecha">Fecha</label>
-            <input type="date" id="oil-fecha" />
-          </div>
-          <div class="field">
-            <label for="oil-kms">Kms. actuales</label>
-            <input type="number" id="oil-kms" placeholder="Ex: 85000" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="oil-tipo">Tipo de Aceite</label>
-          <input type="text" id="oil-tipo" placeholder="Ex: 5W-30 Sintético" />
-        </div>
-        <div class="field">
-          <label for="oil-taller">Taller</label>
-          <input type="text" id="oil-taller" placeholder="Ex: Talleres García" />
-        </div>
-        <div class="field">
-          <label for="oil-precio">Precio (€)</label>
-          <input type="number" id="oil-precio" placeholder="0.00" step="0.01" min="0" />
-        </div>
-
-        <p class="section-label mt">Elementos revisados</p>
-        <div class="check-table">
-          <div class="check-header">
-            <span></span>
-            <span>Servicio</span>
-            <span>Próximo</span>
-          </div>
-          <div class="check-row" data-item="filtro_aceite">
-            <span>Filtro aceite</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-          <div class="check-row" data-item="filtro_aire">
-            <span>Filtro aire</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-          <div class="check-row" data-item="filtro_gasolina">
-            <span>Filtro gasolina</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-          <div class="check-row" data-item="filtro_polen">
-            <span>Filtro polen</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-          <div class="check-row" data-item="correas">
-            <span>Correas</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-          <div class="check-row" data-item="niveles">
-            <span>Niveles</span>
-            <label class="check-box"><input type="checkbox" data-col="servicio" /><span></span></label>
-            <label class="check-box"><input type="checkbox" data-col="proximo" /><span></span></label>
-          </div>
-        </div>
-
-        <div class="field mt">
-          <label for="oil-prox-kms">Próxima revisión a (Kms.)</label>
-          <input type="number" id="oil-prox-kms" placeholder="Ex: 95000" />
-        </div>
-        <div class="field">
-          <label for="oil-notas">Notas</label>
-          <textarea id="oil-notas" rows="3" placeholder="Observaciones..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-ghost modal-close" data-modal="modal-oil">Cancelar</button>
-        <button class="btn-primary" id="btn-save-oil">Guardar</button>
-      </div>
+    <div class="sheet-footer">
+      <button class="btn-ghost modal-close" data-modal="modal-oil">Cancelar</button>
+      <button class="btn-primary" id="btn-save-oil">Guardar</button>
     </div>
   </div>
+</div>
 
-  <!-- Modal: Formulario Mantenimiento / Avería -->
-  <div id="modal-general" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header">
-        <button class="btn-icon" id="btn-back-general">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <h2 id="modal-general-title">Mantenimiento</h2>
-        <button class="btn-icon modal-close" data-modal="modal-general">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+<!-- Modal: Mantenimiento / Avería -->
+<div id="modal-general" class="sheet-overlay hidden" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <button class="icon-btn" id="btn-back-general" aria-label="Volver">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h2 class="sheet-title" id="modal-general-title">Mantenimiento</h2>
+      <button class="icon-btn modal-close" data-modal="modal-general" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="field-group">
+        <label class="field-label" for="gen-nombre">Nombre</label>
+        <input class="field-input" type="text" id="gen-nombre" placeholder="Ej: Pastillas de freno" autocomplete="off" />
       </div>
-      <div class="modal-body">
-        <div class="field">
-          <label for="gen-nombre">Nombre</label>
-          <input type="text" id="gen-nombre" placeholder="Ex: Pastillas de freno" autocomplete="off" />
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="gen-fecha">Fecha</label>
+          <input class="field-input" type="date" id="gen-fecha" />
         </div>
-        <div class="field">
-          <label for="gen-fecha">Fecha</label>
-          <input type="date" id="gen-fecha" />
-        </div>
-        <div class="field">
-          <label for="gen-kms">Kms. actuales</label>
-          <input type="number" id="gen-kms" placeholder="Ex: 85000" />
-        </div>
-        <div class="field">
-          <label for="gen-taller">Taller</label>
-          <input type="text" id="gen-taller" placeholder="Ex: Talleres García" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label for="gen-precio">Precio (€)</label>
-          <input type="number" id="gen-precio" placeholder="0.00" step="0.01" min="0" />
-        </div>
-        <div class="field">
-          <label for="gen-notas">Notas</label>
-          <textarea id="gen-notas" rows="3" placeholder="Descripción o comentarios..."></textarea>
+        <div class="field-group">
+          <label class="field-label" for="gen-kms">Kilómetros</label>
+          <input class="field-input" type="number" id="gen-kms" placeholder="85 000" />
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-ghost modal-close" data-modal="modal-general">Cancelar</button>
-        <button class="btn-primary" id="btn-save-general">Guardar</button>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="gen-taller">Taller</label>
+          <input class="field-input" type="text" id="gen-taller" placeholder="Ej: Talleres García" autocomplete="off" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="gen-precio">Precio €</label>
+          <input class="field-input" type="number" id="gen-precio" placeholder="0.00" step="0.01" min="0" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="gen-notas">Notas</label>
+        <textarea class="field-input field-textarea" id="gen-notas" rows="3" placeholder="Descripción o comentarios…"></textarea>
       </div>
     </div>
-  </div>
-
-  <!-- Modal: Ver detalle de un registro -->
-  <div id="modal-detail" class="modal-overlay hidden">
-    <div class="modal modal-tall">
-      <div class="modal-header">
-        <h2 id="detail-title">Detalle</h2>
-        <button class="btn-icon modal-close" data-modal="modal-detail">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body" id="detail-body"></div>
-      <div class="modal-footer">
-        <button class="btn-danger" id="btn-delete-record">Eliminar</button>
-        <button class="btn-ghost modal-close" data-modal="modal-detail">Cerrar</button>
-      </div>
+    <div class="sheet-footer">
+      <button class="btn-ghost modal-close" data-modal="modal-general">Cancelar</button>
+      <button class="btn-primary" id="btn-save-general">Guardar</button>
     </div>
   </div>
+</div>
 
-  <!-- Toast -->
-  <div id="toast" class="toast hidden"></div>
+<!-- Modal: Detalle registro -->
+<div id="modal-detail" class="sheet-overlay hidden" role="dialog" aria-modal="true" aria-label="Detalle del registro">
+  <div class="sheet sheet--tall">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <h2 class="sheet-title" id="detail-title">Detalle</h2>
+      <button class="icon-btn modal-close" data-modal="modal-detail" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body" id="detail-body"></div>
+    <div class="sheet-footer sheet-footer--spread">
+      <button class="btn-danger" id="btn-delete-record">Eliminar registro</button>
+      <button class="btn-ghost modal-close" data-modal="modal-detail">Cerrar</button>
+    </div>
+  </div>
+</div>
 
-  <script type="module" src="app.js"></script>
+<!-- Toast -->
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>

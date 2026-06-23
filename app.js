@@ -1,183 +1,182 @@
 // ═══════════════════════════════════════════════════════════════
 //  MiGaraje — app.js
-//  Reemplaza firebaseConfig con tu configuración de Firebase.
+//  ⚠️  Reemplaza firebaseConfig con tu configuración real.
 // ═══════════════════════════════════════════════════════════════
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, doc,
-  addDoc, getDocs, deleteDoc, query, orderBy, serverTimestamp
+  addDoc, getDocs, deleteDoc,
+  query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ─── CONFIGURA AQUÍ TU FIREBASE ───────────────────────────────
-  const firebaseConfig = {
-    apiKey: "AIzaSyBkgD5NOFZkfXgIVBZFADD3tJmMwhHyZ6M",
-    authDomain: "migaraje-d8f90.firebaseapp.com",
-    projectId: "migaraje-d8f90",
-    storageBucket: "migaraje-d8f90.firebasestorage.app",
-    messagingSenderId: "796506122449",
-    appId: "1:796506122449:web:0c907dc2c3db98452a3df0"
-  };
+// ─── ⚙️  TU CONFIGURACIÓN DE FIREBASE ────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBkgD5NOFZkfXgIVBZFADD3tJmMwhHyZ6M",
+  authDomain: "migaraje-d8f90.firebaseapp.com",
+  projectId: "migaraje-d8f90",
+  storageBucket: "migaraje-d8f90.firebasestorage.app",
+  messagingSenderId: "796506122449",
+  appId: "1:796506122449:web:0c907dc2c3db98452a3df0"
+};
 // ──────────────────────────────────────────────────────────────
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
 
-// ═══════════════════════════ STATE ═══════════════════════════
-let currentCarId   = null;
-let currentCarName = null;
-let currentRecordId = null;   // para el modal de detalle / borrar
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(console.error);
+}
 
-// ═══════════════════════════ UTILS ═══════════════════════════
+// ══════════════ STATE ══════════════
+let carId   = null;
+let carName = null;
+let detailRecordId = null;
+
+// ══════════════ DOM HELPERS ══════════════
 const $ = id => document.getElementById(id);
-const show = id => { $(id)?.classList.remove('hidden'); };
-const hide = id => { $(id)?.classList.add('hidden'); };
+const hide = el => (typeof el === 'string' ? $(el) : el)?.classList.add('hidden');
+const show = el => (typeof el === 'string' ? $(el) : el)?.classList.remove('hidden');
+const esc  = s  => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-function showToast(msg, ms = 2200) {
+function showToast(msg, ms = 2400) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), ms);
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.add('hidden'), ms);
 }
 
-function formatDate(iso) {
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+
+function fmtDate(iso) {
   if (!iso) return '—';
   const [y, m, d] = iso.split('-');
   return `${d}/${m}/${y}`;
 }
-
-function typeLabel(type) {
-  return { oil: 'Cambio de Aceite', maintenance: 'Mantenimiento', breakdown: 'Avería' }[type] ?? type;
+function fmtKm(v) {
+  if (!v) return null;
+  return Number(v).toLocaleString('es-ES') + ' km';
 }
-function typeIcon(type) {
-  return { oil: '🛢️', maintenance: '🔧', breakdown: '⚠️' }[type] ?? '📋';
-}
-function typeBadgeClass(type) {
-  return { oil: 'oil', maintenance: 'maintenance', breakdown: 'breakdown' }[type] ?? '';
+function fmtEur(v) {
+  if (!v) return null;
+  return Number(v).toFixed(2) + ' €';
 }
 
-// ═══════════════════════════ SCREENS ═══════════════════════════
+const TYPE_LABEL = { oil:'Cambio de Aceite', maintenance:'Mantenimiento', breakdown:'Avería' };
+const TYPE_ICON  = { oil:'🛢️', maintenance:'🔧', breakdown:'⚠️' };
+const TYPE_PILL  = { oil:'oil', maintenance:'maintenance', breakdown:'breakdown' };
+
+// ══════════════ SCREENS ══════════════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id)?.classList.add('active');
-  window.scrollTo(0, 0);
+  $(id)?.classList.add('active');
+  window.scrollTo({ top:0, behavior:'instant' });
 }
 
-// ═══════════════════════════ MODALS ═══════════════════════════
-function openModal(id)  { $(id)?.classList.remove('hidden'); }
-function closeModal(id) { $(id)?.classList.add('hidden'); }
+document.querySelectorAll('.nav-back').forEach(btn =>
+  btn.addEventListener('click', () => showScreen(btn.dataset.target))
+);
 
-document.querySelectorAll('.modal-close').forEach(btn => {
-  btn.addEventListener('click', () => closeModal(btn.dataset.modal));
-});
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) closeModal(overlay.id);
-  });
-});
+// ══════════════ MODALS ══════════════
+const openModal  = id => $(id)?.classList.remove('hidden');
+const closeModal = id => $(id)?.classList.add('hidden');
 
-// ═══════════════════════════ CARS ═══════════════════════════
+document.querySelectorAll('.modal-close').forEach(btn =>
+  btn.addEventListener('click', () => closeModal(btn.dataset.modal))
+);
+document.querySelectorAll('.sheet-overlay').forEach(ov =>
+  ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); })
+);
+
+// ══════════════ CARS ══════════════
 async function loadCars() {
   const list = $('cars-list');
-  list.innerHTML = '';
+  list.innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:.85rem">Cargando…</div>';
+  hide('cars-empty');
   try {
-    const q = query(collection(db, 'cars'), orderBy('createdAt', 'asc'));
+    const q    = query(collection(db,'cars'), orderBy('createdAt','asc'));
     const snap = await getDocs(q);
-    if (snap.empty) {
-      hide('cars-list');
-      show('cars-empty');
-      return;
-    }
-    show('cars-list');
-    hide('cars-empty');
-    snap.forEach(docSnap => renderCarCard(docSnap.id, docSnap.data()));
+    list.innerHTML = '';
+    if (snap.empty) { hide(list); show('cars-empty'); return; }
+    show(list); hide('cars-empty');
+    snap.forEach(d => renderCarCard(d.id, d.data()));
   } catch (err) {
     console.error(err);
+    list.innerHTML = '';
     showToast('❌ Error al cargar los coches');
   }
 }
 
 function renderCarCard(id, data) {
-  const list = $('cars-list');
+  const color = data.color || '#6366f1';
+  const dimColor = color + '22';
   const card = document.createElement('div');
   card.className = 'car-card';
-  card.style.setProperty('--car-color', data.color || '#6c63ff');
+  card.style.setProperty('--car-accent', color);
+  card.style.setProperty('--car-accent-dim', dimColor);
   card.dataset.carId = id;
+  const sub = [data.brand, data.year].filter(Boolean).join(' · ');
   card.innerHTML = `
-    <div class="car-avatar" style="background:${data.color || '#6c63ff'}">🚗</div>
+    <div class="car-avatar">${data.emoji || '🚗'}</div>
     <div class="car-info">
       <div class="car-name">${esc(data.name)}</div>
-      <div class="car-sub">${esc(data.brand || '')}${data.year ? ' · ' + data.year : ''}</div>
+      ${sub ? `<div class="car-meta">${esc(sub)}</div>` : ''}
     </div>
-    <div class="car-actions">
-      <button class="car-delete-btn" data-car-id="${id}" title="Eliminar coche">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14H6L5 6"/>
-          <path d="M10 11v6M14 11v6"/>
-          <path d="M9 6V4h6v2"/>
-        </svg>
-      </button>
-      <div class="car-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-    </div>
-  `;
-  // Navigate to records
+    <button class="car-del" data-id="${id}" aria-label="Eliminar coche">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+      </svg>
+    </button>
+    <div class="car-chevron">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
   card.addEventListener('click', e => {
-    if (e.target.closest('.car-delete-btn')) return;
-    currentCarId   = id;
-    currentCarName = data.name;
+    if (e.target.closest('.car-del')) return;
+    carId = id; carName = data.name;
     $('records-car-name').textContent = data.name;
     showScreen('screen-records');
     loadRecords();
   });
-  // Delete car
-  card.querySelector('.car-delete-btn').addEventListener('click', e => {
+  card.querySelector('.car-del').addEventListener('click', e => {
     e.stopPropagation();
-    deleteCar(id, data.name);
+    if (!confirm(`¿Eliminar "${data.name}" y todos sus registros?`)) return;
+    deleteCar(id);
   });
-  list.appendChild(card);
+  $('cars-list').appendChild(card);
 }
 
-async function deleteCar(id, name) {
-  if (!confirm(`¿Eliminar "${name}" y todos sus registros?`)) return;
+async function deleteCar(id) {
   try {
-    // borrar registros
-    const rSnap = await getDocs(collection(db, 'cars', id, 'records'));
+    const rSnap = await getDocs(collection(db,'cars',id,'records'));
     await Promise.all(rSnap.docs.map(d => deleteDoc(d.ref)));
-    await deleteDoc(doc(db, 'cars', id));
+    await deleteDoc(doc(db,'cars',id));
     showToast('🗑️ Coche eliminado');
     loadCars();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al eliminar');
-  }
+  } catch(err) { console.error(err); showToast('❌ Error al eliminar'); }
 }
 
-// Add Car modal
-$('btn-add-car').addEventListener('click', () => openAddCarModal());
-$('btn-add-car-empty').addEventListener('click', () => openAddCarModal());
-
-function openAddCarModal() {
-  $('car-name').value  = '';
-  $('car-brand').value = '';
-  $('car-year').value  = '';
-  $('car-color').value = '#6c63ff';
-  $('car-color-label').textContent = '#6c63ff';
+// Add car modal
+['btn-add-car','btn-add-car-empty'].forEach(id => $(id)?.addEventListener('click', openCarModal));
+function openCarModal() {
+  $('car-name').value=$('car-brand').value=$('car-year').value='';
+  $('car-color').value='#6366f1';
+  $('car-color-hex').textContent='#6366f1';
   openModal('modal-car');
-  $('car-name').focus();
+  setTimeout(() => $('car-name').focus(), 350);
 }
-
-$('car-color').addEventListener('input', e => {
-  $('car-color-label').textContent = e.target.value;
-});
+$('car-color').addEventListener('input', e => { $('car-color-hex').textContent = e.target.value; });
 
 $('btn-save-car').addEventListener('click', async () => {
   const name = $('car-name').value.trim();
   if (!name) { showToast('⚠️ Escribe un nombre'); return; }
   try {
-    await addDoc(collection(db, 'cars'), {
+    await addDoc(collection(db,'cars'), {
       name,
-      brand: $('car-brand').value.trim(),
+      brand: $('car-brand').value.trim() || null,
       year:  $('car-year').value  || null,
       color: $('car-color').value,
       createdAt: serverTimestamp()
@@ -185,113 +184,76 @@ $('btn-save-car').addEventListener('click', async () => {
     closeModal('modal-car');
     showToast('✅ Coche añadido');
     loadCars();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al guardar');
-  }
+  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
 });
 
-// Back from records
-document.querySelectorAll('.btn-back').forEach(btn => {
-  btn.addEventListener('click', () => showScreen(btn.dataset.target));
-});
-
-// ═══════════════════════════ RECORDS ═══════════════════════════
+// ══════════════ RECORDS ══════════════
 async function loadRecords() {
   const list = $('records-list');
-  list.innerHTML = '';
+  list.innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:.85rem">Cargando…</div>';
+  hide('records-empty');
   try {
-    const q = query(
-      collection(db, 'cars', currentCarId, 'records'),
-      orderBy('fecha', 'desc')
-    );
+    const q = query(collection(db,'cars',carId,'records'), orderBy('fecha','desc'));
     const snap = await getDocs(q);
-    if (snap.empty) {
-      hide('records-list');
-      show('records-empty');
-      return;
-    }
-    show('records-list');
-    hide('records-empty');
+    list.innerHTML = '';
+    if (snap.empty) { hide(list); show('records-empty'); return; }
+    show(list); hide('records-empty');
     snap.forEach(d => renderRecordCard(d.id, d.data()));
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al cargar registros');
-  }
+  } catch(err) { console.error(err); list.innerHTML=''; showToast('❌ Error al cargar'); }
 }
 
 function renderRecordCard(id, data) {
-  const list = $('records-list');
+  const pill = TYPE_PILL[data.type] || 'maintenance';
+  const meta  = [fmtDate(data.fecha), fmtKm(data.kms), fmtEur(data.precio)].filter(Boolean).join(' · ');
   const card = document.createElement('div');
   card.className = 'record-card';
   card.dataset.type = data.type;
-  card.dataset.recordId = id;
-
-  const kmsStr = data.kms ? ` · ${Number(data.kms).toLocaleString('es-ES')} km` : '';
-  const precioStr = data.precio ? ` · ${Number(data.precio).toFixed(2)} €` : '';
-
   card.innerHTML = `
-    <div class="record-icon">${typeIcon(data.type)}</div>
+    <div class="record-icon-wrap record-icon-wrap--${data.type}">${TYPE_ICON[data.type] || '📋'}</div>
     <div class="record-info">
-      <div class="record-title">${esc(data.nombre || typeLabel(data.type))}</div>
-      <div class="record-meta">${formatDate(data.fecha)}${kmsStr}${precioStr}</div>
+      <div class="record-title">${esc(data.nombre || TYPE_LABEL[data.type])}</div>
+      <div class="record-meta">${esc(meta || '—')}</div>
     </div>
-    <span class="record-badge ${typeBadgeClass(data.type)}">${typeLabel(data.type)}</span>
-  `;
+    <span class="record-pill record-pill--${pill}">${TYPE_LABEL[data.type] || data.type}</span>`;
   card.addEventListener('click', () => openDetailModal(id, data));
-  list.appendChild(card);
+  $('records-list').appendChild(card);
 }
 
-// Add record buttons
-$('btn-add-record').addEventListener('click', openTypeModal);
-$('btn-add-record-empty').addEventListener('click', openTypeModal);
+['btn-add-record','btn-add-record-empty'].forEach(id => $(id)?.addEventListener('click', () => openModal('modal-type')));
 
-function openTypeModal() { openModal('modal-type'); }
-
-// Type selector
-document.querySelectorAll('.type-btn').forEach(btn => {
+// ══════════════ TYPE SELECT ══════════════
+document.querySelectorAll('.type-card').forEach(btn => {
   btn.addEventListener('click', () => {
     const type = btn.dataset.type;
     closeModal('modal-type');
-    if (type === 'oil') {
-      resetOilForm();
-      openModal('modal-oil');
-    } else {
-      resetGeneralForm(type);
-      openModal('modal-general');
-    }
+    if (type === 'oil') { resetOilForm(); openModal('modal-oil'); }
+    else                { resetGenForm(type); openModal('modal-general'); }
   });
 });
 
-// Back buttons in sub-modals
-$('btn-back-oil').addEventListener('click', () => {
-  closeModal('modal-oil');
-  openModal('modal-type');
-});
-$('btn-back-general').addEventListener('click', () => {
-  closeModal('modal-general');
-  openModal('modal-type');
-});
+$('btn-back-oil').addEventListener('click',     () => { closeModal('modal-oil');     openModal('modal-type'); });
+$('btn-back-general').addEventListener('click', () => { closeModal('modal-general'); openModal('modal-type'); });
 
-// ═══════════════════════ OIL CHANGE FORM ═══════════════════
+// ══════════════ OIL FORM ══════════════
 function resetOilForm() {
-  $('oil-fecha').value     = todayISO();
-  $('oil-kms').value       = '';
-  $('oil-tipo').value      = '';
-  $('oil-taller').value    = '';
-  $('oil-precio').value    = '';
-  $('oil-prox-kms').value  = '';
-  $('oil-notas').value     = '';
-  document.querySelectorAll('.check-table input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  $('oil-fecha').value    = todayISO();
+  $('oil-kms').value      = '';
+  $('oil-tipo').value     = '';
+  $('oil-taller').value   = '';
+  $('oil-precio').value   = '';
+  $('oil-prox-kms').value = '';
+  $('oil-notas').value    = '';
+  document.querySelectorAll('#modal-oil input[type=checkbox]').forEach(cb => cb.checked = false);
 }
 
-function getChecks() {
+function readChecks() {
   const result = {};
-  document.querySelectorAll('.check-row').forEach(row => {
+  document.querySelectorAll('#modal-oil .check-item').forEach(row => {
     const item = row.dataset.item;
-    const servicio = row.querySelector('[data-col="servicio"]').checked;
-    const proximo  = row.querySelector('[data-col="proximo"]').checked;
-    result[item] = { servicio, proximo };
+    result[item] = {
+      servicio: row.querySelector('[data-col="servicio"]').checked,
+      proximo:  row.querySelector('[data-col="proximo"]').checked
+    };
   });
   return result;
 }
@@ -300,192 +262,151 @@ $('btn-save-oil').addEventListener('click', async () => {
   const fecha = $('oil-fecha').value;
   if (!fecha) { showToast('⚠️ Indica la fecha'); return; }
   try {
-    await addDoc(collection(db, 'cars', currentCarId, 'records'), {
-      type:     'oil',
-      nombre:   'Cambio de Aceite',
+    await addDoc(collection(db,'cars',carId,'records'), {
+      type:       'oil',
+      nombre:     'Cambio de Aceite',
       fecha,
-      kms:      $('oil-kms').value     || null,
-      tipoAceite: $('oil-tipo').value.trim()   || null,
-      taller:   $('oil-taller').value.trim()  || null,
-      precio:   $('oil-precio').value  || null,
-      proxKms:  $('oil-prox-kms').value || null,
-      notas:    $('oil-notas').value.trim()   || null,
-      checks:   getChecks(),
-      createdAt: serverTimestamp()
+      kms:        $('oil-kms').value      || null,
+      tipoAceite: $('oil-tipo').value.trim()    || null,
+      taller:     $('oil-taller').value.trim()  || null,
+      precio:     $('oil-precio').value   || null,
+      proxKms:    $('oil-prox-kms').value || null,
+      notas:      $('oil-notas').value.trim()   || null,
+      checks:     readChecks(),
+      createdAt:  serverTimestamp()
     });
     closeModal('modal-oil');
     showToast('✅ Cambio de aceite guardado');
     loadRecords();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al guardar');
-  }
+  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
 });
 
-// ═══════════════════════ GENERAL FORM ═══════════════════════
-let _currentType = 'maintenance';
-
-function resetGeneralForm(type) {
-  _currentType = type;
-  $('modal-general-title').textContent = type === 'breakdown' ? '⚠️ Avería' : '🔧 Mantenimiento';
-  $('gen-nombre').value = '';
-  $('gen-fecha').value  = todayISO();
-  $('gen-kms').value    = '';
-  $('gen-taller').value = '';
-  $('gen-precio').value = '';
-  $('gen-notas').value  = '';
+// ══════════════ GENERAL FORM ══════════════
+let _genType = 'maintenance';
+function resetGenForm(type) {
+  _genType = type;
+  $('modal-general-title').textContent = type === 'breakdown' ? 'Avería' : 'Mantenimiento';
+  $('gen-nombre').value=$('gen-kms').value=$('gen-taller').value=$('gen-precio').value=$('gen-notas').value='';
+  $('gen-fecha').value = todayISO();
 }
-
 $('btn-save-general').addEventListener('click', async () => {
   const nombre = $('gen-nombre').value.trim();
   const fecha  = $('gen-fecha').value;
   if (!nombre) { showToast('⚠️ Escribe un nombre'); return; }
   if (!fecha)  { showToast('⚠️ Indica la fecha');   return; }
   try {
-    await addDoc(collection(db, 'cars', currentCarId, 'records'), {
-      type:    _currentType,
-      nombre,
-      fecha,
-      kms:     $('gen-kms').value    || null,
-      taller:  $('gen-taller').value.trim() || null,
-      precio:  $('gen-precio').value || null,
-      notas:   $('gen-notas').value.trim()  || null,
+    await addDoc(collection(db,'cars',carId,'records'), {
+      type:   _genType, nombre, fecha,
+      kms:    $('gen-kms').value    || null,
+      taller: $('gen-taller').value.trim() || null,
+      precio: $('gen-precio').value || null,
+      notas:  $('gen-notas').value.trim()  || null,
       createdAt: serverTimestamp()
     });
     closeModal('modal-general');
     showToast('✅ Registro guardado');
     loadRecords();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al guardar');
-  }
+  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
 });
 
-// ═══════════════════════ DETAIL MODAL ═══════════════════════
-const CHECK_NAMES = {
-  filtro_aceite:    'Filtro aceite',
-  filtro_aire:      'Filtro aire',
-  filtro_gasolina:  'Filtro gasolina',
-  filtro_polen:     'Filtro polen',
-  correas:          'Correas',
-  niveles:          'Niveles'
+// ══════════════ DETAIL MODAL ══════════════
+const CHECK_NAME = {
+  filtro_aceite:      'Filtro aceite',
+  filtro_gasoil:      'Filtro gasoil',
+  filtro_aire:        'Filtro aire',
+  filtro_habitaculo:  'Filtro habitáculo',
+  niveles:            'Niveles',
+  presion_neumaticos: 'Presión neumáticos'
 };
 
 function openDetailModal(id, data) {
-  currentRecordId = id;
-  $('detail-title').textContent = data.nombre || typeLabel(data.type);
-
+  detailRecordId = id;
+  $('detail-title').textContent = data.nombre || TYPE_LABEL[data.type];
   const body = $('detail-body');
   body.innerHTML = '';
 
-  // Pill
+  // pill
   const pill = document.createElement('span');
-  pill.className = `type-pill ${typeBadgeClass(data.type)}`;
-  pill.textContent = `${typeIcon(data.type)} ${typeLabel(data.type)}`;
+  pill.className = `detail-pill detail-pill--${TYPE_PILL[data.type]}`;
+  pill.textContent = `${TYPE_ICON[data.type]}  ${TYPE_LABEL[data.type]}`;
   body.appendChild(pill);
 
   if (data.type === 'oil') {
-    // Info rows
-    appendSection(body, 'Datos generales', [
-      ['Fecha',              formatDate(data.fecha)],
-      ['Kilómetros',         data.kms    ? Number(data.kms).toLocaleString('es-ES') + ' km' : '—'],
-      ['Tipo de aceite',     data.tipoAceite || '—'],
-      ['Taller',             data.taller  || '—'],
-      ['Precio',             data.precio  ? Number(data.precio).toFixed(2) + ' €'  : '—'],
-      ['Próxima revisión',   data.proxKms ? Number(data.proxKms).toLocaleString('es-ES') + ' km' : '—'],
+    addRows(body, 'Datos generales', [
+      ['Fecha',            fmtDate(data.fecha)],
+      ['Kilómetros',       fmtKm(data.kms)   || '—'],
+      ['Tipo de aceite',   data.tipoAceite    || '—'],
+      ['Taller',           data.taller        || '—'],
+      ['Precio',           fmtEur(data.precio)|| '—'],
+      ['Próxima revisión', fmtKm(data.proxKms)|| '—'],
     ]);
-
-    if (data.notas) {
-      appendSection(body, 'Notas', [['', data.notas]]);
-    }
-
-    // Checks table
     if (data.checks) {
-      const secTitle = document.createElement('h3');
-      secTitle.className = 'section-label mt';
-      secTitle.style.marginTop = '4px';
-      secTitle.textContent = 'Elementos revisados';
-      body.appendChild(secTitle);
-
+      const lbl = document.createElement('p');
+      lbl.className = 'detail-sec-label'; lbl.style.marginTop='8px';
+      lbl.textContent = 'Elementos revisados';
+      body.appendChild(lbl);
       const tbl = document.createElement('div');
       tbl.className = 'detail-checks';
-      tbl.innerHTML = `
-        <div class="detail-check-header">
-          <span></span><span>Servicio</span><span>Próximo</span>
-        </div>
-      `;
-      Object.entries(data.checks).forEach(([key, val]) => {
+      tbl.innerHTML = `<div class="detail-checks-header"><span></span><span>Servicio</span><span>Próximo</span></div>`;
+      Object.entries(data.checks).forEach(([k, v]) => {
         const row = document.createElement('div');
         row.className = 'detail-check-row';
         row.innerHTML = `
-          <span>${CHECK_NAMES[key] || key}</span>
-          <span class="${val.servicio ? 'chk-yes' : 'chk-no'}">${val.servicio ? '✔' : '—'}</span>
-          <span class="${val.proximo  ? 'chk-yes' : 'chk-no'}">${val.proximo  ? '✔' : '—'}</span>
-        `;
+          <span>${CHECK_NAME[k] || k}</span>
+          <span>${v.servicio ? '<span class="chk-done">✓</span>' : '<span class="chk-none">—</span>'}</span>
+          <span>${v.proximo  ? '<span class="chk-next">próximo</span>' : '<span class="chk-none">—</span>'}</span>`;
         tbl.appendChild(row);
       });
       body.appendChild(tbl);
     }
-
   } else {
-    appendSection(body, 'Datos', [
-      ['Nombre',      data.nombre  || '—'],
-      ['Fecha',       formatDate(data.fecha)],
-      ['Kilómetros',  data.kms    ? Number(data.kms).toLocaleString('es-ES') + ' km' : '—'],
-      ['Taller',      data.taller  || '—'],
-      ['Precio',      data.precio  ? Number(data.precio).toFixed(2) + ' €'  : '—'],
+    addRows(body, 'Datos', [
+      ['Nombre',      data.nombre        || '—'],
+      ['Fecha',       fmtDate(data.fecha)],
+      ['Kilómetros',  fmtKm(data.kms)   || '—'],
+      ['Taller',      data.taller        || '—'],
+      ['Precio',      fmtEur(data.precio)|| '—'],
     ]);
-    if (data.notas) {
-      appendSection(body, 'Notas', [['', data.notas]]);
-    }
+  }
+
+  if (data.notas) {
+    const lbl = document.createElement('p');
+    lbl.className='detail-sec-label'; lbl.style.marginTop='8px';
+    lbl.textContent='Notas'; body.appendChild(lbl);
+    const n = document.createElement('div');
+    n.className='detail-notas'; n.textContent=data.notas;
+    body.appendChild(n);
   }
 
   openModal('modal-detail');
 }
 
-function appendSection(container, title, rows) {
+function addRows(container, label, rows) {
+  const lbl = document.createElement('p');
+  lbl.className = 'detail-sec-label'; lbl.style.marginTop='4px';
+  lbl.textContent = label;
+  container.appendChild(lbl);
   const sec = document.createElement('div');
   sec.className = 'detail-section';
-  if (title) {
-    const h = document.createElement('h3');
-    h.className = 'section-label';
-    h.textContent = title;
-    sec.appendChild(h);
-  }
-  rows.forEach(([label, value]) => {
+  rows.forEach(([l, v], i) => {
     const row = document.createElement('div');
     row.className = 'detail-row';
-    row.innerHTML = `
-      <span class="label">${esc(label)}</span>
-      <span class="value">${esc(String(value ?? '—'))}</span>
-    `;
+    row.innerHTML = `<span class="detail-lbl">${esc(l)}</span><span class="detail-val">${esc(v)}</span>`;
     sec.appendChild(row);
   });
   container.appendChild(sec);
 }
 
-// Delete record
 $('btn-delete-record').addEventListener('click', async () => {
-  if (!currentRecordId || !currentCarId) return;
+  if (!detailRecordId || !carId) return;
   if (!confirm('¿Eliminar este registro?')) return;
   try {
-    await deleteDoc(doc(db, 'cars', currentCarId, 'records', currentRecordId));
+    await deleteDoc(doc(db,'cars',carId,'records',detailRecordId));
     closeModal('modal-detail');
     showToast('🗑️ Registro eliminado');
     loadRecords();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ Error al eliminar');
-  }
+  } catch(err) { console.error(err); showToast('❌ Error al eliminar'); }
 });
 
-// ═══════════════════════ HELPERS ═══════════════════════════
-function todayISO() {
-  return new Date().toISOString().split('T')[0];
-}
-function esc(str) {
-  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ═══════════════════════ INIT ═══════════════════════════════
+// ══════════════ INIT ══════════════
 loadCars();
