@@ -357,14 +357,18 @@ function openDetailModal(id, data) {
       body.appendChild(lbl);
       const tbl = document.createElement('div');
       tbl.className = 'detail-checks';
-      tbl.innerHTML = `<div class="detail-checks-header"><span></span><span>Servicio</span><span>Próximo</span></div>`;
+      tbl.innerHTML = `<div class="detail-checks-header">
+        <span class="dch-spacer"></span>
+        <span class="dch-col">Servicio</span>
+        <span class="dch-col">Próximo</span>
+      </div>`;
       Object.entries(data.checks).forEach(([k, v]) => {
         const row = document.createElement('div');
         row.className = 'detail-check-row';
         row.innerHTML = `
-          <span>${CHECK_NAME[k] || k}</span>
-          <span>${v.servicio ? '<span class="chk-done">✓</span>' : '<span class="chk-none">—</span>'}</span>
-          <span>${v.proximo  ? '<span class="chk-next">próximo</span>' : '<span class="chk-none">—</span>'}</span>`;
+          <span class="dcr-name">${CHECK_NAME[k] || k}</span>
+          <span class="dcr-col">${v.servicio ? '<span class="chk-done">✓</span>' : '<span class="chk-none">—</span>'}</span>
+          <span class="dcr-col">${v.proximo  ? '<span class="chk-next">próximo</span>' : '<span class="chk-none">—</span>'}</span>`;
         tbl.appendChild(row);
       });
       body.appendChild(tbl);

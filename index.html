@@ -190,36 +190,30 @@
       <div class="checks-section">
         <p class="checks-title">Elementos revisados</p>
         <div class="checks-legend">
-          <span></span>
-          <span class="legend-label">Servicio</span>
-          <span class="legend-label">Próximo</span>
+          <span class="checks-legend-spacer"></span>
+          <span class="legend-col">Servicio</span>
+          <span class="legend-col">Próximo</span>
         </div>
-        <div class="checks-list">
+                <div class="checks-list">
           <div class="check-item" data-item="filtro_aceite">
             <div class="check-item__info">
               <span class="check-item__icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h10l2 4H5L7 3z"/><path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="8" rx="5" ry="3"/><path d="M7 8v8c0 1.66 2.24 3 5 3s5-1.34 5-3V8"/><path d="M7 12c0 1.66 2.24 3 5 3s5-1.34 5-3"/></svg>
               </span>
               <span class="check-item__name">Filtro aceite</span>
             </div>
-            <label class="toggle-check" aria-label="Filtro aceite servicio">
-              <input type="checkbox" data-col="servicio" />
-              <span class="toggle-check__box"></span>
-            </label>
-            <label class="toggle-check" aria-label="Filtro aceite próximo">
-              <input type="checkbox" data-col="proximo" />
-              <span class="toggle-check__box toggle-check__box--next"></span>
-            </label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
           <div class="check-item" data-item="filtro_gasoil">
             <div class="check-item__info">
               <span class="check-item__icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22h12M4 9h10M2 15h14M12 2l4 4-8 8-4-4 8-8z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.5 2M7.5 13h9l1-5H6l1.5 5z"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg>
               </span>
               <span class="check-item__name">Filtro gasoil</span>
             </div>
-            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
-            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
           <div class="check-item" data-item="filtro_aire">
             <div class="check-item__info">
@@ -228,28 +222,28 @@
               </span>
               <span class="check-item__name">Filtro aire</span>
             </div>
-            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
-            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
           <div class="check-item" data-item="filtro_habitaculo">
             <div class="check-item__info">
               <span class="check-item__icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M8 6V4m8 2V4"/></svg>
               </span>
               <span class="check-item__name">Filtro habitáculo</span>
             </div>
-            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
-            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
           <div class="check-item" data-item="niveles">
             <div class="check-item__info">
               <span class="check-item__icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 6h6M9 10h6M9 14h4"/></svg>
               </span>
               <span class="check-item__name">Niveles</span>
             </div>
-            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
-            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
           <div class="check-item" data-item="presion_neumaticos">
             <div class="check-item__info">
@@ -258,8 +252,8 @@
               </span>
               <span class="check-item__name">Presión neumáticos</span>
             </div>
-            <label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label>
-            <label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="servicio" /><span class="toggle-check__box"></span></label></div>
+            <div class="check-col"><label class="toggle-check"><input type="checkbox" data-col="proximo" /><span class="toggle-check__box toggle-check__box--next"></span></label></div>
           </div>
         </div>
       </div>
