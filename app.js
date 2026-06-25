@@ -115,8 +115,8 @@ async function loadCars() {
 }
 
 function renderCarCard(id, data) {
-  const color = data.color || '#6366f1';
-  const dimColor = color + '22';
+  const color = data.color || '#d9251c';
+  const dimColor = color + '18';
   const card = document.createElement('div');
   card.className = 'car-card';
   card.style.setProperty('--car-accent', color);
@@ -168,8 +168,8 @@ async function deleteCar(id) {
 ['btn-add-car','btn-add-car-empty'].forEach(id => $(id)?.addEventListener('click', openCarModal));
 function openCarModal() {
   $('car-name').value=$('car-brand').value=$('car-year').value='';
-  $('car-color').value='#6366f1';
-  $('car-color-hex').textContent='#6366f1';
+  $('car-color').value='#d9251c';
+  $('car-color-hex').textContent='#d9251c';
   openModal('modal-car');
   setTimeout(() => $('car-name').focus(), 350);
 }
