@@ -144,8 +144,9 @@ textarea { resize:none; }
   width:46px; height:46px; border-radius:12px;
   background:var(--car-accent-dim, var(--accent2));
   display:flex; align-items:center; justify-content:center;
-  font-size:1.5rem; flex-shrink:0;
+  flex-shrink:0; color:var(--car-accent, var(--accent));
 }
+.car-avatar svg { width:22px; height:22px; }
 .car-info { flex:1; min-width:0; }
 .car-name { font-weight:600; font-size:.95rem; }
 .car-meta { font-size:.78rem; color:var(--text2); margin-top:3px; }
@@ -182,11 +183,12 @@ textarea { resize:none; }
 .record-icon-wrap {
   width:40px; height:40px; border-radius:10px;
   display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; font-size:1.2rem;
+  flex-shrink:0;
 }
-.record-icon-wrap--oil         { background:var(--oil2); }
-.record-icon-wrap--maintenance { background:var(--maint2); }
-.record-icon-wrap--breakdown   { background:var(--break2); }
+.record-icon-wrap svg { width:18px; height:18px; }
+.record-icon-wrap--oil         { background:var(--oil2);   color:var(--oil); }
+.record-icon-wrap--maintenance { background:var(--maint2); color:var(--maint); }
+.record-icon-wrap--breakdown   { background:var(--break2); color:var(--break); }
 
 .record-info { flex:1; min-width:0; }
 .record-title { font-weight:500; font-size:.9rem; }
@@ -332,9 +334,9 @@ input[type="color"].color-swatch {
   padding:12px 14px 0;
 }
 .checks-legend {
-  display:grid; grid-template-columns:1fr 76px 76px;
-  padding:8px 14px 6px;
-  font-size:.68rem; font-weight:600; letter-spacing:.06em;
+  display:grid; grid-template-columns:1fr 56px 56px;
+  padding:8px 12px 6px;
+  font-size:.65rem; font-weight:600; letter-spacing:.06em;
   text-transform:uppercase; color:var(--text3);
   border-bottom:1px solid var(--border);
 }
@@ -343,18 +345,18 @@ input[type="color"].color-swatch {
 .checks-list { display:flex; flex-direction:column; }
 
 .check-item {
-  display:grid; grid-template-columns:1fr 76px 76px;
+  display:grid; grid-template-columns:1fr 56px 56px;
   align-items:center;
-  padding:12px 14px;
+  padding:11px 12px;
   border-bottom:1px solid var(--border);
   transition:background var(--dur);
 }
 .check-item:last-child { border-bottom:none; }
 .check-item:hover { background:var(--bg4); }
 
-.check-item__info { display:flex; align-items:center; gap:9px; }
+.check-item__info { display:flex; align-items:center; gap:7px; min-width:0; }
 .check-item__icon { color:var(--text3); display:flex; align-items:center; flex-shrink:0; }
-.check-item__name { font-size:.88rem; font-weight:400; }
+.check-item__name { font-size:.82rem; font-weight:400; }
 
 /* Toggle checkbox */
 .toggle-check {
@@ -363,7 +365,7 @@ input[type="color"].color-swatch {
 .toggle-check input { position:absolute; opacity:0; width:0; height:0; }
 
 .toggle-check__box {
-  width:26px; height:26px; border-radius:7px;
+  width:24px; height:24px; border-radius:6px;
   border:1.5px solid rgba(255,255,255,.15);
   background:var(--bg2);
   display:flex; align-items:center; justify-content:center;
@@ -393,10 +395,11 @@ input[type="color"].color-swatch {
 
 /* ══════════════ DETAIL MODAL ══════════════ */
 .detail-pill {
-  display:inline-flex; align-items:center; gap:7px;
+  display:inline-flex; align-items:center; gap:6px;
   padding:5px 13px; border-radius:20px; font-size:.78rem; font-weight:600;
   margin-bottom:4px;
 }
+.detail-pill svg { width:14px; height:14px; }
 .detail-pill--oil         { background:var(--oil2);   color:var(--oil); }
 .detail-pill--maintenance { background:var(--maint2); color:var(--maint); }
 .detail-pill--breakdown   { background:var(--break2); color:var(--break); }
@@ -424,14 +427,14 @@ input[type="color"].color-swatch {
   border-radius:var(--r-sm); overflow:hidden;
 }
 .detail-checks-header {
-  display:grid; grid-template-columns:1fr 72px 72px;
+  display:grid; grid-template-columns:1fr 60px 60px;
   padding:8px 12px;
   font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
   color:var(--text3); border-bottom:1px solid var(--border); text-align:center;
 }
 .detail-checks-header span:first-child { text-align:left; }
 .detail-check-row {
-  display:grid; grid-template-columns:1fr 72px 72px;
+  display:grid; grid-template-columns:1fr 60px 60px;
   padding:10px 12px; align-items:center;
   border-bottom:1px solid var(--border); font-size:.83rem; text-align:center;
 }

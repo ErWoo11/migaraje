@@ -65,6 +65,11 @@ function fmtEur(v) {
 }
 
 const TYPE_LABEL = { oil:'Cambio de Aceite', maintenance:'Mantenimiento', breakdown:'Avería' };
+const TYPE_ICON_SVG = {
+  oil: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="8" rx="7" ry="4"/><path d="M5 8v8c0 2.2 3.1 4 7 4s7-1.8 7-4V8"/><path d="M5 12c0 2.2 3.1 4 7 4s7-1.8 7-4"/></svg>`,
+  maintenance: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
+  breakdown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+};
 const TYPE_ICON  = { oil:'🛢️', maintenance:'🔧', breakdown:'⚠️' };
 const TYPE_PILL  = { oil:'oil', maintenance:'maintenance', breakdown:'breakdown' };
 
@@ -105,7 +110,7 @@ async function loadCars() {
   } catch (err) {
     console.error(err);
     list.innerHTML = '';
-    showToast('❌ Error al cargar los coches');
+    showToast('Error al cargar los coches');
   }
 }
 
@@ -119,7 +124,7 @@ function renderCarCard(id, data) {
   card.dataset.carId = id;
   const sub = [data.brand, data.year].filter(Boolean).join(' · ');
   card.innerHTML = `
-    <div class="car-avatar">${data.emoji || '🚗'}</div>
+    <div class="car-avatar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1"/><path d="M19 17h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-1"/><path d="M14 17H9"/><path d="M17 17v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M9 8l1-4h4l1 4"/></svg></div>
     <div class="car-info">
       <div class="car-name">${esc(data.name)}</div>
       ${sub ? `<div class="car-meta">${esc(sub)}</div>` : ''}
@@ -154,9 +159,9 @@ async function deleteCar(id) {
     const rSnap = await getDocs(collection(db,'cars',id,'records'));
     await Promise.all(rSnap.docs.map(d => deleteDoc(d.ref)));
     await deleteDoc(doc(db,'cars',id));
-    showToast('🗑️ Coche eliminado');
+    showToast('Coche eliminado');
     loadCars();
-  } catch(err) { console.error(err); showToast('❌ Error al eliminar'); }
+  } catch(err) { console.error(err); showToast('Error al eliminar'); }
 }
 
 // Add car modal
@@ -172,7 +177,7 @@ $('car-color').addEventListener('input', e => { $('car-color-hex').textContent =
 
 $('btn-save-car').addEventListener('click', async () => {
   const name = $('car-name').value.trim();
-  if (!name) { showToast('⚠️ Escribe un nombre'); return; }
+  if (!name) { showToast('Escribe un nombre'); return; }
   try {
     await addDoc(collection(db,'cars'), {
       name,
@@ -182,9 +187,9 @@ $('btn-save-car').addEventListener('click', async () => {
       createdAt: serverTimestamp()
     });
     closeModal('modal-car');
-    showToast('✅ Coche añadido');
+    showToast('Coche añadido');
     loadCars();
-  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
+  } catch(err) { console.error(err); showToast('Error al guardar'); }
 });
 
 // ══════════════ RECORDS ══════════════
@@ -199,7 +204,7 @@ async function loadRecords() {
     if (snap.empty) { hide(list); show('records-empty'); return; }
     show(list); hide('records-empty');
     snap.forEach(d => renderRecordCard(d.id, d.data()));
-  } catch(err) { console.error(err); list.innerHTML=''; showToast('❌ Error al cargar'); }
+  } catch(err) { console.error(err); list.innerHTML=''; showToast('Error al cargar'); }
 }
 
 function renderRecordCard(id, data) {
@@ -209,7 +214,7 @@ function renderRecordCard(id, data) {
   card.className = 'record-card';
   card.dataset.type = data.type;
   card.innerHTML = `
-    <div class="record-icon-wrap record-icon-wrap--${data.type}">${TYPE_ICON[data.type] || '📋'}</div>
+    <div class="record-icon-wrap record-icon-wrap--${data.type}">${TYPE_ICON_SVG[data.type] || ''}</div>
     <div class="record-info">
       <div class="record-title">${esc(data.nombre || TYPE_LABEL[data.type])}</div>
       <div class="record-meta">${esc(meta || '—')}</div>
@@ -260,7 +265,7 @@ function readChecks() {
 
 $('btn-save-oil').addEventListener('click', async () => {
   const fecha = $('oil-fecha').value;
-  if (!fecha) { showToast('⚠️ Indica la fecha'); return; }
+  if (!fecha) { showToast('Indica la fecha'); return; }
   try {
     await addDoc(collection(db,'cars',carId,'records'), {
       type:       'oil',
@@ -276,9 +281,9 @@ $('btn-save-oil').addEventListener('click', async () => {
       createdAt:  serverTimestamp()
     });
     closeModal('modal-oil');
-    showToast('✅ Cambio de aceite guardado');
+    showToast('Cambio de aceite guardado');
     loadRecords();
-  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
+  } catch(err) { console.error(err); showToast('Error al guardar'); }
 });
 
 // ══════════════ GENERAL FORM ══════════════
@@ -292,8 +297,8 @@ function resetGenForm(type) {
 $('btn-save-general').addEventListener('click', async () => {
   const nombre = $('gen-nombre').value.trim();
   const fecha  = $('gen-fecha').value;
-  if (!nombre) { showToast('⚠️ Escribe un nombre'); return; }
-  if (!fecha)  { showToast('⚠️ Indica la fecha');   return; }
+  if (!nombre) { showToast('Escribe un nombre'); return; }
+  if (!fecha)  { showToast('Indica la fecha');   return; }
   try {
     await addDoc(collection(db,'cars',carId,'records'), {
       type:   _genType, nombre, fecha,
@@ -304,9 +309,9 @@ $('btn-save-general').addEventListener('click', async () => {
       createdAt: serverTimestamp()
     });
     closeModal('modal-general');
-    showToast('✅ Registro guardado');
+    showToast('Registro guardado');
     loadRecords();
-  } catch(err) { console.error(err); showToast('❌ Error al guardar'); }
+  } catch(err) { console.error(err); showToast('Error al guardar'); }
 });
 
 // ══════════════ DETAIL MODAL ══════════════
@@ -328,7 +333,12 @@ function openDetailModal(id, data) {
   // pill
   const pill = document.createElement('span');
   pill.className = `detail-pill detail-pill--${TYPE_PILL[data.type]}`;
-  pill.textContent = `${TYPE_ICON[data.type]}  ${TYPE_LABEL[data.type]}`;
+  pill.innerHTML = '';
+  const pillIcon = document.createElement('span');
+  pillIcon.style.cssText = 'display:flex;align-items:center;';
+  pillIcon.innerHTML = TYPE_ICON_SVG[data.type] || '';
+  pill.appendChild(pillIcon);
+  pill.appendChild(document.createTextNode(TYPE_LABEL[data.type]));
   body.appendChild(pill);
 
   if (data.type === 'oil') {
@@ -403,9 +413,9 @@ $('btn-delete-record').addEventListener('click', async () => {
   try {
     await deleteDoc(doc(db,'cars',carId,'records',detailRecordId));
     closeModal('modal-detail');
-    showToast('🗑️ Registro eliminado');
+    showToast('Registro eliminado');
     loadRecords();
-  } catch(err) { console.error(err); showToast('❌ Error al eliminar'); }
+  } catch(err) { console.error(err); showToast('Error al eliminar'); }
 });
 
 // ══════════════ INIT ══════════════
