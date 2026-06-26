@@ -36,13 +36,13 @@ const fbApp = initializeApp(firebaseConfig);
 const db    = getFirestore(fbApp);
 const auth  = getAuth(fbApp);
 
-// Persistencia de sesión en localStorage → sobrevive a cerrar la pestaña
-await setPersistence(auth, browserLocalPersistence);
-
 // Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(console.error);
 }
+
+// Persistencia: se aplica antes de onAuthStateChanged (no async en top-level)
+setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 // ══════════════ STATE ══════════════
 let currentUser = null;
@@ -209,20 +209,28 @@ $('btn-logout').addEventListener('click', async () => {
 });
 
 // ── OBSERVADOR DE SESIÓN — corazón del sistema ──
+// Firebase llama a este callback UNA vez al arrancar (con user o null)
+// y luego cada vez que cambia la sesión.
 onAuthStateChanged(auth, user => {
   currentUser = user;
+
+  // Ocultar splash siempre, con pequeña transición
+  const splash = $('screen-splash');
+  if (splash) {
+    splash.classList.add('hidden');
+    setTimeout(() => splash.remove(), 350);
+  }
+
   if (user) {
-    // Actualizar saludo
+    // Sesión activa → ir a la app
     const name = user.displayName?.split(' ')[0] || 'de nuevo';
     $('hero-greeting').textContent = `Hola, ${name}`;
-    // Ir a la app
     showScreen('screen-cars');
     loadCars();
   } else {
-    // Sin sesión → login
-    showScreen('screen-login');
-    // Resetear estado
+    // Sin sesión → login (nunca llamar a loadCars aquí)
     carId = null; carName = null;
+    showScreen('screen-login');
     // Limpiar formularios
     $('login-email').value = $('login-password').value = '';
     $('reg-name').value = $('reg-email').value = $('reg-password').value = '';
@@ -281,6 +289,7 @@ const carRecs  = (cid) => collection(db, 'users', currentUser.uid, 'cars', cid, 
 const carRec   = (cid, rid) => doc(db, 'users', currentUser.uid, 'cars', cid, 'records', rid);
 
 async function loadCars() {
+  if (!currentUser) return;   // guard: nunca ejecutar sin sesión
   const list = $('cars-list');
   list.innerHTML = '<div class="loading-msg">Cargando…</div>';
   hide('cars-empty');
@@ -387,6 +396,7 @@ $('btn-save-car').addEventListener('click', async () => {
 // ══════════════════════════════════════════════
 
 async function loadRecords() {
+  if (!currentUser) return;   // guard
   const list = $('records-list');
   list.innerHTML = '<div class="loading-msg">Cargando…</div>';
   hide('records-empty');
