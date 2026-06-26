@@ -574,3 +574,134 @@ input[type="color"].color-swatch {
   from { opacity:0; transform:translateX(-50%) translateY(10px); }
   to   { opacity:1; transform:translateX(-50%) translateY(0); }
 }
+
+/* ══════════════════════════════════════════
+   LOGIN / AUTH
+══════════════════════════════════════════ */
+.login-wrap {
+  min-height:100dvh;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px 16px;
+  background: linear-gradient(160deg, #fff 0%, #f4f5f7 60%, #ffe8e7 100%);
+}
+
+.login-card {
+  background:var(--bg-white);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.1);
+  width:100%; max-width:420px;
+  overflow:hidden;
+}
+
+/* Cabecera login */
+.login-header {
+  background:var(--red);
+  padding:32px 28px 24px;
+  text-align:center;
+  position:relative;
+}
+.login-header::after {
+  content:'';
+  position:absolute; bottom:-1px; left:0; right:0; height:20px;
+  background:var(--bg-white);
+  clip-path:ellipse(55% 100% at 50% 100%);
+}
+.login-logo {
+  width:60px; height:60px; border-radius:14px;
+  background:rgba(255,255,255,.2);
+  border:2px solid rgba(255,255,255,.3);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 14px; color:#fff;
+}
+.login-logo svg { width:30px; height:30px; }
+.login-title {
+  font-size:1.6rem; font-weight:800;
+  letter-spacing:-.02em; color:#fff; margin-bottom:4px;
+}
+.login-sub { font-size:.8rem; color:rgba(255,255,255,.75); letter-spacing:.02em; }
+
+/* Tabs */
+.auth-tabs {
+  display:flex; border-bottom:1px solid var(--border);
+  padding:0 24px; margin-top:4px;
+}
+.auth-tab {
+  flex:1; padding:12px 0; font-size:.82rem; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase;
+  color:var(--text3); border-bottom:2px solid transparent;
+  transition:color var(--dur), border-color var(--dur);
+  margin-bottom:-1px;
+}
+.auth-tab--active { color:var(--red); border-bottom-color:var(--red); }
+
+/* Forms */
+.auth-form { padding:24px 24px 28px; display:flex; flex-direction:column; gap:14px; }
+.auth-form.hidden { display:none; }
+
+/* Input with icon */
+.input-icon-wrap { position:relative; }
+.input-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--text3); pointer-events:none;
+}
+.field-input--icon { padding-left:38px; padding-right:38px; }
+.input-eye {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  color:var(--text3); padding:4px;
+  transition:color var(--dur);
+  display:flex; align-items:center; justify-content:center;
+}
+.input-eye:hover { color:var(--text2); }
+
+/* Forgot */
+.btn-forgot {
+  font-size:.78rem; color:var(--red); font-weight:600;
+  text-align:right; align-self:flex-end;
+  transition:opacity var(--dur);
+}
+.btn-forgot:hover { opacity:.75; }
+
+/* Auth error */
+.auth-error {
+  font-size:.8rem; color:var(--red);
+  background:var(--red-dim2); border:1px solid rgba(217,37,28,.15);
+  border-radius:var(--r-sm); padding:9px 12px;
+  line-height:1.4;
+}
+
+/* Submit button */
+.btn-auth {
+  width:100%; padding:13px; border-radius:var(--r-sm);
+  background:var(--red); color:#fff;
+  font-size:.92rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 4px 16px rgba(217,37,28,.3);
+  transition:background var(--dur), transform .15s, box-shadow var(--dur);
+  margin-top:4px;
+}
+.btn-auth:hover  { background:var(--red-dark); }
+.btn-auth:active { transform:scale(.97); }
+.btn-auth:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+/* Spinner */
+@keyframes spin { to { transform:rotate(360deg); } }
+.spin { animation:spin .8s linear infinite; }
+
+/* Hero actions row (logout button) */
+.hero-actions { display:flex; align-items:center; gap:8px; }
+.btn-logout {
+  width:38px; height:38px; border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text2); border:1px solid var(--border);
+  background:var(--bg-white);
+  transition:background var(--dur), color var(--dur), border-color var(--dur);
+}
+.btn-logout:hover { background:var(--red-dim); color:var(--red); border-color:rgba(217,37,28,.3); }
+
+/* Loading placeholder */
+.loading-msg {
+  padding:40px 0; text-align:center;
+  color:var(--text3); font-size:.85rem; font-weight:500;
+  letter-spacing:.04em;
+}
