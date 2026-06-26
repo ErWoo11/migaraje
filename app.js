@@ -559,7 +559,13 @@ function openDetailModal(id, data) {
         <span class="dch-col">Servicio</span>
         <span class="dch-col">Próximo</span>
       </div>`;
-      Object.entries(data.checks).forEach(([k, v]) => {
+      // Orden canónico garantizado (Firestore puede devolver claves en otro orden)
+      const CHECK_ORDER = ['filtro_aceite','filtro_gasoil','filtro_aire',
+                           'filtro_habitaculo','niveles','presion_neumaticos'];
+      const checksOrdered = CHECK_ORDER
+        .filter(k => data.checks[k] !== undefined)
+        .map(k => [k, data.checks[k]]);
+      checksOrdered.forEach(([k, v]) => {
         const row = document.createElement('div');
         row.className = 'detail-check-row';
         row.innerHTML = `

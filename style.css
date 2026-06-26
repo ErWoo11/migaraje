@@ -307,11 +307,13 @@ textarea { resize:none; }
     border-radius:var(--r-lg);
     border-bottom:1px solid var(--border);
     border-top:4px solid var(--red);
-    height:auto; max-height:90dvh;
+    /* Clave: height explícita para que flex scroll funcione en sheet-body */
+    height:90dvh;
+    max-height:90dvh;
     padding-bottom:0;
   }
-  .sheet--tall    { max-height:94dvh; }
-  .sheet--compact { height:auto; max-height:70dvh; }
+  .sheet--tall    { height:94dvh; max-height:94dvh; }
+  .sheet--compact { height:auto;  max-height:60dvh; }
 }
 
 .sheet-handle {
@@ -525,7 +527,8 @@ input[type="color"].color-swatch {
 
 .detail-checks {
   background:var(--bg-white); border:1.5px solid var(--border);
-  border-radius:var(--r); overflow:hidden;
+  border-radius:var(--r);
+  /* Sin overflow:hidden para que no corte filas en desktop */
 }
 .detail-checks-header {
   display:flex; padding:7px 12px;
