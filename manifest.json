@@ -1,0 +1,13 @@
+{
+  "name": "MiGaraje",
+  "short_name": "MiGaraje",
+  "description": "Tu aplicación para llevar el control de tu vehículo.",
+  "start_url": "/migaraje/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d9251c",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "logo.png", "sizes": "any", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
